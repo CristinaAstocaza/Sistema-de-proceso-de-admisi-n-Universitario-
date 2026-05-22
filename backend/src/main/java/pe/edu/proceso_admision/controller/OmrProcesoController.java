@@ -1,8 +1,10 @@
 package pe.edu.proceso_admision.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import pe.edu.proceso_admision.dto.omr.*;
 import pe.edu.proceso_admision.entity.Anulacion;
 import pe.edu.proceso_admision.repository.AnulacionRepository;
@@ -22,6 +24,7 @@ public class OmrProcesoController {
     private final ReporteFinalService reporteFinalService;
     private final OmrConsultaService omrConsultaService;
     private final IncidenciaService incidenciaService;
+    private final DbfImportService dbfImportService;
     private final AnulacionRepository anulacionRepository;
     private final ProcesoAdmisionRepository procesoAdmisionRepository;
     private final UsuarioRepository usuarioRepository;
@@ -34,6 +37,14 @@ public class OmrProcesoController {
         omrCargaService.cargarIdentifi(procesoId, request);
     }
 
+    @PostMapping(value = "/api/procesos/{id}/upload-identifi-dbf", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public void uploadIdentifiDbf(@PathVariable("id") Long procesoId,
+                                  @RequestParam("archivo") MultipartFile archivo) {
+        CargaOmrIdentifiRequestDto request = dbfImportService.parsearIdentifi(archivo);
+        omrCargaService.cargarIdentifi(procesoId, request);
+    }
+
     @PostMapping("/api/procesos/{id}/cargar-respuest")
     @ResponseStatus(HttpStatus.CREATED)
     public void cargarRespuest(@PathVariable("id") Long procesoId,
@@ -41,10 +52,26 @@ public class OmrProcesoController {
         omrCargaService.cargarRespuest(procesoId, request);
     }
 
+    @PostMapping(value = "/api/procesos/{id}/upload-respuest-dbf", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public void uploadRespuestDbf(@PathVariable("id") Long procesoId,
+                                  @RequestParam("archivo") MultipartFile archivo) {
+        CargaOmrRespuestRequestDto request = dbfImportService.parsearRespuest(archivo);
+        omrCargaService.cargarRespuest(procesoId, request);
+    }
+
     @PostMapping("/api/procesos/{id}/cargar-claves")
     @ResponseStatus(HttpStatus.CREATED)
     public void cargarClaves(@PathVariable("id") Long procesoId,
                              @RequestBody CargaOmrClaveRequestDto request) {
+        omrCargaService.cargarClaves(procesoId, request);
+    }
+
+    @PostMapping(value = "/api/procesos/{id}/upload-claves-dbf", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public void uploadClavesDbf(@PathVariable("id") Long procesoId,
+                                @RequestParam("archivo") MultipartFile archivo) {
+        CargaOmrClaveRequestDto request = dbfImportService.parsearClaves(archivo);
         omrCargaService.cargarClaves(procesoId, request);
     }
 

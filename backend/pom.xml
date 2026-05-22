@@ -72,6 +72,13 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Lectura DBF -->
+        <dependency>
+            <groupId>com.github.albfernandez</groupId>
+            <artifactId>javadbf</artifactId>
+            <version>1.14.1</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
