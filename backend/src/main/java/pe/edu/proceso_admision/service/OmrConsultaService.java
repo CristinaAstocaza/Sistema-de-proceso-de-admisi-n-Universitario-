@@ -3,6 +3,7 @@ package pe.edu.proceso_admision.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pe.edu.proceso_admision.dto.omr.AjusteResultadoRequestDto;
 import pe.edu.proceso_admision.dto.omr.AlumnoDetalleDto;
 import pe.edu.proceso_admision.dto.omr.AuditoriaResponseDto;
 import pe.edu.proceso_admision.dto.omr.ProcesoEstadisticasDto;
@@ -12,6 +13,7 @@ import pe.edu.proceso_admision.repository.*;
 
 import java.util.List;
 import java.util.Locale;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,8 @@ public class OmrConsultaService {
     private final ProcesoCarreraRepository procesoCarreraRepository;
     private final PostulanteRepository postulanteRepository;
     private final AuditoriaRepository auditoriaRepository;
+    private final ReporteFinalService reporteFinalService;
+    private final AuditoriaService auditoriaService;
 
     @Transactional(readOnly = true)
     public ProcesoEstadisticasDto obtenerEstadisticas(Long procesoId) {
@@ -120,31 +124,99 @@ public class OmrConsultaService {
         ResultadoProcesado resultado = resultadoProcesadoRepository.findTopByProcesoIdAndCodigo(procesoId, codigo)
                 .orElseThrow(() -> new ResourceNotFoundException("Resultado no encontrado para código: " + codigo));
 
-        Anulacion anulacion = Anulacion.builder()
-                .proceso(proceso)
-                .codigo(codigo)
-                .litocodigo(resultado.getLitocodigo())
-                .motivo(motivo)
-                .creadoEn(java.time.LocalDateTime.now())
-                .build();
+        Anulacion anulacion = anulacionRepository.findByProcesoIdAndCodigo(procesoId, codigo)
+                .orElseGet(() -> Anulacion.builder()
+                        .proceso(proceso)
+                        .codigo(codigo)
+                        .litocodigo(resultado.getLitocodigo())
+                        .creadoEn(java.time.LocalDateTime.now())
+                        .build());
+        anulacion.setLitocodigo(resultado.getLitocodigo());
+        anulacion.setMotivo(motivo);
+        anulacion.setCreadoEn(java.time.LocalDateTime.now());
         anulacionRepository.save(anulacion);
 
         resultado.setEstado("ANULADO");
         resultado.setObservacion(motivo != null && !motivo.isBlank() ? motivo : "Anulado por observación");
+        resultado.setPuntaje(java.math.BigDecimal.ZERO);
+        resultado.setCorrectas(0);
+        resultado.setIncorrectas(0);
+        resultado.setBlancas(0);
         resultadoProcesadoRepository.save(resultado);
 
         reporteFinalRepository.findTopByProcesoIdAndCodigo(procesoId, codigo).ifPresent(rf -> {
             rf.setCondicion("NO INGRESO");
+            rf.setPuntaje(java.math.BigDecimal.ZERO);
+            rf.setMerito("0");
             reporteFinalRepository.save(rf);
         });
 
+        reporteFinalService.generar(procesoId);
+
         List<Incidencia> incidencias = incidenciaRepository.findByProcesoIdAndCodigo(procesoId, codigo);
         for (Incidencia inc : incidencias) {
-            if (inc.getEstado() != null && "PENDIENTE".equalsIgnoreCase(inc.getEstado())) {
-                inc.setEstado("ANULADO");
-                incidenciaRepository.save(inc);
-            }
+            inc.setEstado("ANULADO");
+            String motivoFinal = motivo != null && !motivo.isBlank() ? motivo : "Anulado manualmente";
+            String decisionNueva = "accion=anular_examen | motivo=" + motivoFinal + " | fecha=" + java.time.LocalDateTime.now();
+            inc.setDecisionAdmin(decisionNueva);
+            incidenciaRepository.save(inc);
         }
+    }
+
+    @Transactional
+    public AlumnoDetalleDto ajustarResultadoManual(Long procesoId,
+                                                   String codigo,
+                                                   AjusteResultadoRequestDto request,
+                                                   Long usuarioId) {
+        if (request == null || request.getMotivo() == null || request.getMotivo().isBlank()) {
+            throw new IllegalArgumentException("El motivo es obligatorio para ajustar resultado.");
+        }
+
+        procesoAdmisionRepository.findById(procesoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Proceso no encontrado con id: " + procesoId));
+
+        ResultadoProcesado resultado = resultadoProcesadoRepository.findTopByProcesoIdAndCodigo(procesoId, codigo)
+                .orElseThrow(() -> new ResourceNotFoundException("Resultado no encontrado para código: " + codigo));
+
+        Integer prevCorrectas = resultado.getCorrectas();
+        Integer prevIncorrectas = resultado.getIncorrectas();
+        Integer prevBlancas = resultado.getBlancas();
+        BigDecimal prevPuntaje = resultado.getPuntaje();
+        String prevEstado = resultado.getEstado();
+        String prevObs = resultado.getObservacion();
+
+        if (request.getCorrectas() != null) resultado.setCorrectas(request.getCorrectas());
+        if (request.getIncorrectas() != null) resultado.setIncorrectas(request.getIncorrectas());
+        if (request.getBlancas() != null) resultado.setBlancas(request.getBlancas());
+        if (request.getPuntaje() != null) resultado.setPuntaje(request.getPuntaje());
+        if (request.getEstado() != null && !request.getEstado().isBlank()) resultado.setEstado(request.getEstado().trim());
+        if (request.getObservacion() != null) resultado.setObservacion(request.getObservacion().trim());
+
+        resultadoProcesadoRepository.saveAndFlush(resultado);
+        reporteFinalService.generar(procesoId);
+
+        String descripcion = "proceso_id=" + procesoId +
+                " codigo=" + codigo +
+                " motivo=" + request.getMotivo().trim() +
+                " | before{correctas=" + String.valueOf(prevCorrectas) +
+                ", incorrectas=" + String.valueOf(prevIncorrectas) +
+                ", blancas=" + String.valueOf(prevBlancas) +
+                ", puntaje=" + String.valueOf(prevPuntaje) +
+                ", estado=" + String.valueOf(prevEstado) +
+                ", observacion=" + String.valueOf(prevObs) +
+                "} after{correctas=" + String.valueOf(resultado.getCorrectas()) +
+                ", incorrectas=" + String.valueOf(resultado.getIncorrectas()) +
+                ", blancas=" + String.valueOf(resultado.getBlancas()) +
+                ", puntaje=" + String.valueOf(resultado.getPuntaje()) +
+                ", estado=" + String.valueOf(resultado.getEstado()) +
+                ", observacion=" + String.valueOf(resultado.getObservacion()) + "}";
+
+        auditoriaService.registrar(usuarioId,
+                "AJUSTE_RESULTADO_MANUAL",
+                "resultados_procesados",
+                descripcion);
+
+        return obtenerDetalleAlumno(procesoId, codigo);
     }
 
     @Transactional(readOnly = true)

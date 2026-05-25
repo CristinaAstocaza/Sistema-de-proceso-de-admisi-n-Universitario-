@@ -2,16 +2,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import procesoService from "@/services/procesoService";
-import omrService from "@/services/omrService";
-import { crearProcesoVacio, crearPuntajeVacio } from "@/models/procesoModel";
+import { crearProcesoVacio } from "@/models/procesoModel";
+import { ClipboardList } from "lucide-react";
 
 const NuevoProceso = () => {
   const [proceso, setProceso] = useState(crearProcesoVacio());
-  const [puntaje, setPuntaje] = useState(crearPuntajeVacio());
   const [procesoCreado, setProcesoCreado] = useState(null);
-  const [archivosDbf, setArchivosDbf] = useState({ identifi: null, respuest: null, claves: null });
-  const [cargasDbf, setCargasDbf] = useState({ identifi: false, respuest: false, claves: false });
-  const [subiendo, setSubiendo] = useState({ identifi: false, respuest: false, claves: false });
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
 
@@ -30,107 +26,59 @@ const NuevoProceso = () => {
     }
   };
 
-  const guardarPuntaje = async () => {
-    if (!procesoCreado?.id) return;
-    try {
-      setError("");
-      await procesoService.guardarConfiguracionPuntaje(procesoCreado.id, {
-        puntajeCorrecta: Number(puntaje.puntajeCorrecta),
-        puntajeIncorrecta: Number(puntaje.puntajeIncorrecta),
-        puntajeBlanco: Number(puntaje.puntajeBlanco),
-      });
-      setMensaje("Puntajes guardados");
-    } catch (e) {
-      setError(e.message);
-    }
-  };
-
-  const seleccionarArchivoDbf = (tipo) => (event) => {
-    const archivo = event.target.files?.[0] || null;
-    if (!archivo) return;
-    if (!archivo.name.toLowerCase().endsWith(".dbf")) {
-      setError("Solo se permiten archivos .dbf");
-      return;
-    }
-    setError("");
-    setArchivosDbf((prev) => ({ ...prev, [tipo]: archivo }));
-  };
-
-  const cargarArchivo = async (tipo) => {
-    if (!procesoCreado?.id) return;
-    const archivo = archivosDbf[tipo];
-    if (!archivo) {
-      setError(`Seleccione archivo .dbf para ${tipo}`);
-      return;
-    }
-    try {
-      setError("");
-      setSubiendo((prev) => ({ ...prev, [tipo]: true }));
-      if (tipo === "identifi") await omrService.subirIdentifiDbf(procesoCreado.id, archivo);
-      if (tipo === "respuest") await omrService.subirRespuestDbf(procesoCreado.id, archivo);
-      if (tipo === "claves") await omrService.subirClavesDbf(procesoCreado.id, archivo);
-      setCargasDbf((prev) => ({ ...prev, [tipo]: true }));
-      setMensaje(`Carga ${tipo} registrada desde ${archivo.name}`);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setSubiendo((prev) => ({ ...prev, [tipo]: false }));
-    }
-  };
-
-  const puedeProcesar = procesoCreado?.id && cargasDbf.identifi && cargasDbf.respuest && cargasDbf.claves;
+  // Estilos reutilizables adaptados a modo oscuro
+  const inputClases = "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 hover:border-slate-500 dark:hover:border-slate-400 focus-visible:ring-2 focus-visible:ring-slate-600/50 transition-all duration-200";
+  const btnPrimarioClases = "bg-slate-700 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white transition-colors duration-200";
+  const panelGlass = "rounded-2xl border border-slate-200/70 dark:border-slate-700/60 bg-white/75 dark:bg-slate-900/45 backdrop-blur-xl shadow-[0_12px_35px_-22px_rgba(37,99,235,0.28)]";
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Nuevo Proceso</h2>
+      <div className="space-y-1">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Creación guiada</p>
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Nuevo Proceso</h2>
+      </div>
 
-      {mensaje ? <p className="text-sm text-emerald-600">{mensaje}</p> : null}
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {mensaje ? <p className="text-sm text-emerald-600 dark:text-emerald-400">{mensaje}</p> : null}
+      {error ? <p className="text-sm text-red-600 dark:text-red-400">{error}</p> : null}
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input placeholder="Nombre" value={proceso.nombre} onChange={actualizarCampo(setProceso, "nombre")} />
-        <Input placeholder="Modalidad" value={proceso.modalidad} onChange={actualizarCampo(setProceso, "modalidad")} />
-        <Input placeholder="Periodo" value={proceso.periodo} onChange={actualizarCampo(setProceso, "periodo")} />
-        <Input placeholder="Estado" value={proceso.estado} onChange={actualizarCampo(setProceso, "estado")} />
-        <Input placeholder="Descripción" value={proceso.descripcion} onChange={actualizarCampo(setProceso, "descripcion")} />
+      <section className={`${panelGlass} p-6 space-y-5`}>
+        <div className="flex items-center gap-3">
+          <ClipboardList className="h-6 w-6 text-indigo-500" />
+          <div>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">Información General</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Datos principales del proceso de admisión.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Nombre del proceso</label>
+            <Input className={`h-12 ${inputClases}`} placeholder="Ej. Admisión 2026" value={proceso.nombre} onChange={actualizarCampo(setProceso, "nombre")} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Modalidad</label>
+            <Input className={`h-12 ${inputClases}`} placeholder="Ej. Presencial" value={proceso.modalidad} onChange={actualizarCampo(setProceso, "modalidad")} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Periodo</label>
+            <Input className={`h-12 ${inputClases}`} placeholder="Ej. 2026-I" value={proceso.periodo} onChange={actualizarCampo(setProceso, "periodo")} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Estado</label>
+            <Input className={`h-12 ${inputClases}`} placeholder="Ej. Activo" value={proceso.estado} onChange={actualizarCampo(setProceso, "estado")} />
+          </div>
+          <div className="space-y-1 md:col-span-2">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Descripción</label>
+            <Input className={`h-12 ${inputClases}`} placeholder="Breve descripción del proceso..." value={proceso.descripcion} onChange={actualizarCampo(setProceso, "descripcion")} />
+          </div>
+        </div>
       </section>
 
-      <Button onClick={crearProceso}>Guardar Proceso</Button>
-
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Input placeholder="Puntaje correcta" value={puntaje.puntajeCorrecta} onChange={actualizarCampo(setPuntaje, "puntajeCorrecta")} />
-        <Input placeholder="Puntaje incorrecta" value={puntaje.puntajeIncorrecta} onChange={actualizarCampo(setPuntaje, "puntajeIncorrecta")} />
-        <Input placeholder="Puntaje blanco" value={puntaje.puntajeBlanco} onChange={actualizarCampo(setPuntaje, "puntajeBlanco")} />
-      </section>
-      <Button variant="outline" onClick={guardarPuntaje} disabled={!procesoCreado?.id}>
-        Guardar Puntajes
-      </Button>
-
-      <section className="space-y-3">
+      <section className={`${panelGlass} p-6 flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between`}>
         <div className="space-y-1">
-          <Input type="file" accept=".dbf" onChange={seleccionarArchivoDbf("identifi")} />
-          <p className="text-xs text-muted-foreground">{archivosDbf.identifi ? archivosDbf.identifi.name : "Sin archivo IDENTIFI"}</p>
-          <Button variant="outline" onClick={() => cargarArchivo("identifi")} disabled={!procesoCreado?.id || subiendo.identifi}>
-            {subiendo.identifi ? "Subiendo..." : "Cargar Identifi"}
-          </Button>
+          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">Resumen del Proceso</h3>
+          <p className="text-sm text-slate-500 dark:text-slate-400">ID generado: {procesoCreado?.id || "Sin crear"}</p>
         </div>
-        <div className="space-y-1">
-          <Input type="file" accept=".dbf" onChange={seleccionarArchivoDbf("respuest")} />
-          <p className="text-xs text-muted-foreground">{archivosDbf.respuest ? archivosDbf.respuest.name : "Sin archivo RESPUEST"}</p>
-          <Button variant="outline" onClick={() => cargarArchivo("respuest")} disabled={!procesoCreado?.id || subiendo.respuest}>
-            {subiendo.respuest ? "Subiendo..." : "Cargar Respuest"}
-          </Button>
-        </div>
-        <div className="space-y-1">
-          <Input type="file" accept=".dbf" onChange={seleccionarArchivoDbf("claves")} />
-          <p className="text-xs text-muted-foreground">{archivosDbf.claves ? archivosDbf.claves.name : "Sin archivo CLAVES"}</p>
-          <Button variant="outline" onClick={() => cargarArchivo("claves")} disabled={!procesoCreado?.id || subiendo.claves}>
-            {subiendo.claves ? "Subiendo..." : "Cargar Claves"}
-          </Button>
-        </div>
-        <Button disabled={!puedeProcesar}>
-          Procesar examen habilitado
-        </Button>
+        <Button className={`h-12 px-6 rounded-xl ${btnPrimarioClases}`} onClick={crearProceso}>Crear Proceso</Button>
       </section>
     </div>
   );

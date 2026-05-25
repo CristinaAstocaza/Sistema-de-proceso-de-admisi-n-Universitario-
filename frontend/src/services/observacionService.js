@@ -20,6 +20,11 @@ const observacionService = {
     const { data } = await apiClient.post("/api/anulaciones", payload);
     return data;
   },
+
+  listarAnulaciones: async (procesoId) => {
+    const { data } = await apiClient.get(`/api/procesos/${procesoId}/anulaciones`);
+    return data;
+  },
 };
 
 export default observacionService;

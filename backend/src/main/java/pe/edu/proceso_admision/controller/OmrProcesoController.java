@@ -134,6 +134,13 @@ public class OmrProcesoController {
                 "proceso_id=" + procesoId + " codigo=" + codigo + " motivo=" + request.getMotivo());
     }
 
+    @PostMapping("/api/procesos/{id}/alumnos/{codigo}/ajustar-resultado")
+    public AlumnoDetalleDto ajustarResultado(@PathVariable("id") Long procesoId,
+                                             @PathVariable("codigo") String codigo,
+                                             @RequestBody AjusteResultadoRequestDto request) {
+        return omrConsultaService.ajustarResultadoManual(procesoId, codigo, request, null);
+    }
+
     @GetMapping("/api/auditoria")
     public List<AuditoriaResponseDto> auditoria(@RequestParam(value = "procesoId", required = false) Long procesoId,
                                                 @RequestParam(value = "codigo", required = false) String codigo,
@@ -174,6 +181,21 @@ public class OmrProcesoController {
                 .build();
         anulacionRepository.save(a);
         auditoriaService.registrar(request.getAnuladoPor(), "CREAR_ANULACION", "anulaciones", "Anulación litocodigo=" + request.getLitocodigo());
+    }
+
+    @GetMapping("/api/procesos/{id}/anulaciones")
+    public List<AnulacionResponseDto> listarAnulaciones(@PathVariable("id") Long procesoId) {
+        return anulacionRepository.findByProcesoId(procesoId).stream()
+                .map(a -> AnulacionResponseDto.builder()
+                        .id(a.getId())
+                        .procesoId(a.getProceso() != null ? a.getProceso().getId() : null)
+                        .codigo(a.getCodigo())
+                        .litocodigo(a.getLitocodigo())
+                        .motivo(a.getMotivo())
+                        .estado("ANULADO")
+                        .creadoEn(a.getCreadoEn())
+                        .build())
+                .toList();
     }
 }
 

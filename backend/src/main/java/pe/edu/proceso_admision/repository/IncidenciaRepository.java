@@ -10,6 +10,8 @@ public interface IncidenciaRepository extends JpaRepository<Incidencia, Long> {
     List<Incidencia> findByProcesoId(Long procesoId);
     Optional<Incidencia> findTopByProcesoIdAndCodigoOrderByCreadoEnDesc(Long procesoId, String codigo);
     List<Incidencia> findByProcesoIdAndCodigo(Long procesoId, String codigo);
+    boolean existsByProcesoIdAndLitocodigoAndTipoAndEstado(Long procesoId, String litocodigo, String tipo, String estado);
+    void deleteByProcesoIdAndEstadoNot(Long procesoId, String estado);
     void deleteByProcesoId(Long procesoId);
 }
 

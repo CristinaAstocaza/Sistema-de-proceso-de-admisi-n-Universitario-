@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface AnulacionRepository extends JpaRepository<Anulacion, Long> {
     Optional<Anulacion> findByProcesoIdAndLitocodigo(Long procesoId, String litocodigo);
+    Optional<Anulacion> findByProcesoIdAndCodigo(Long procesoId, String codigo);
     List<Anulacion> findByProcesoId(Long procesoId);
 }
 

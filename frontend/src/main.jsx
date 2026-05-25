@@ -4,8 +4,13 @@ import './index.css'
 import { RouterProvider } from 'react-router-dom'
 import router from './routes/routes.jsx'
 
+import { ThemeProvider } from "./context/themeContext";
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    {/* Envolvemos el enrutador con nuestro proveedor de tema */}
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   </StrictMode>
 )

@@ -69,10 +69,22 @@ public class ReporteFinalService {
             }
 
             int pos = 0;
+            int meritoActual = 0;
+            BigDecimal puntajeAnterior = null;
             for (ReporteFinal rf : lista) {
                 pos++;
-                rf.setSec(String.valueOf(pos));
-                rf.setMerito(String.valueOf(pos));
+
+                // SEC: secuencial siempre (0001, 0002, ...)
+                rf.setSec(String.format("%04d", pos));
+
+                // MÉRITO: mismo puntaje => mismo mérito
+                BigDecimal puntajeActual = rf.getPuntaje() != null ? rf.getPuntaje() : BigDecimal.ZERO;
+                if (puntajeAnterior == null || puntajeActual.compareTo(puntajeAnterior) != 0) {
+                    meritoActual = pos;
+                }
+                rf.setMerito(String.valueOf(meritoActual));
+                puntajeAnterior = puntajeActual;
+
                 if (vacantes <= 0) {
                     rf.setCondicion("NO INGRESO");
                 } else if (pos <= vacantes) {

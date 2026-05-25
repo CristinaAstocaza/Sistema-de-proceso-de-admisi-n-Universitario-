@@ -16,6 +16,11 @@ const resultadoService = {
     return data;
   },
 
+  ajustarResultadoManual: async (procesoId, codigo, payload) => {
+    const { data } = await apiClient.post(`/api/procesos/${procesoId}/alumnos/${codigo}/ajustar-resultado`, payload);
+    return data;
+  },
+
   obtenerReporteFinal: async (procesoId) => {
     const { data } = await apiClient.get(`/api/procesos/${procesoId}/reporte-final`);
     return data;

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a0e49979-a73d-4d60-9cf6-1a199dc4b20e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/controller/OmrProcesoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/controller/OmrProcesoController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/dto/omr/ResultadoProcesadoDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/dto/omr/ResultadoProcesadoDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/repository/AnulacionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/repository/AnulacionRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/repository/IncidenciaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/repository/IncidenciaRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/repository/OmrRespuestRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/repository/OmrRespuestRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/repository/UsuarioRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/repository/UsuarioRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/service/IncidenciaService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/service/IncidenciaService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/service/OmrConsultaService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/service/OmrConsultaService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/service/ProcesamientoOmrService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/service/ProcesamientoOmrService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/service/ReporteFinalService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pe/edu/proceso_admision/service/ReporteFinalService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/apiClient.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/apiClient.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/DashBoard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/DashBoard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/main.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/private/Anulados.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/private/Anulados.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/private/GestionProcesos.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/private/GestionProcesos.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/private/NuevoProceso.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/private/NuevoProceso.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/private/Observaciones.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/private/Observaciones.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/routes/routes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routes/routes.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/exportacionService.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/exportacionService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/observacionService.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/observacionService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/resultadoService.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/resultadoService.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="2" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 2
+}]]></component>
+  <component name="ProjectId" id="3ECitxnoczQ5CWfK8Hd628k7aV7" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.ProcesoUniApplication.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Spring Boot.ProcesoUniApplication.executor": "Run",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "SDKs",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-37e91769500f-intellij.indexing.shared.core-IU-261.24374.151" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-IU-261.24374.151" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a0e49979-a73d-4d60-9cf6-1a199dc4b20e" name="Changes" comment="" />
+      <created>1779689172629</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1779689172629</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

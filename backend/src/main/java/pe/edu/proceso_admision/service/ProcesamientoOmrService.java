@@ -27,7 +27,7 @@ public class ProcesamientoOmrService {
     private final ResultadoProcesadoRepository resultadoProcesadoRepository;
     private final RespuestaDetalleRepository respuestaDetalleRepository;
     private final AnulacionRepository anulacionRepository;
-    private final IncidenciaService incidenciaService;
+    private final IncidenciaRepository incidenciaRepository;
     private final ReporteFinalService reporteFinalService;
     private final AuditoriaService auditoriaService;
     private final PostulanteRepository postulanteRepository;
@@ -41,8 +41,8 @@ public class ProcesamientoOmrService {
         BigDecimal pIncorrecta = cfg != null ? cfg.getPuntajeIncorrecta() : BigDecimal.valueOf(-1.125);
         BigDecimal pBlanco = cfg != null ? cfg.getPuntajeBlanco() : BigDecimal.ZERO;
 
-        // control de reproceso: limpiar completamente antes de recalcular
-        incidenciaService.eliminarPorProceso(procesoId);
+        // control de reproceso: conservar incidencias ya resueltas
+        incidenciaRepository.deleteByProcesoIdAndEstadoNot(procesoId, "RESUELTO");
         respuestaDetalleRepository.deleteByResultadoProcesoId(procesoId);
         resultadoProcesadoRepository.deleteByProcesoId(procesoId);
 
@@ -112,30 +112,38 @@ public class ProcesamientoOmrService {
             boolean incidenciaGrave = false;
 
             if (codigo == null || codigo.isBlank()) {
-                incidenciaService.crear(procesoId, resp.getLitocodigo(), codigo, "CODIGO_NO_EXISTE", "No se encontró código en IDENTIFI para litocodigo");
+                crearIncidencia(procesoId, resp.getLitocodigo(), codigo, "CODIGO_NO_EXISTE", "No se encontró código en IDENTIFI para litocodigo");
                 incidenciaGrave = true;
             } else if (!postulantePorCodigo.containsKey(codigo)) {
-                incidenciaService.crear(procesoId, resp.getLitocodigo(), codigo, "POSTULANTE_NO_EXISTE", "No se encontró postulante para el código");
+                crearIncidencia(procesoId, resp.getLitocodigo(), codigo, "POSTULANTE_NO_EXISTE", "No se encontró postulante para el código");
                 incidenciaGrave = true;
             }
 
             if ((temaIdent == null || temaIdent.isBlank()) && temaResp != null && !temaResp.isBlank()) {
-                incidenciaService.crear(procesoId, resp.getLitocodigo(), codigo, "SIN_TEMA_IDENTIFI", "Identificación sin tema");
+                crearIncidencia(procesoId, resp.getLitocodigo(), codigo, "SIN_TEMA_IDENTIFI", "Identificación sin tema");
                 incidenciaGrave = true;
             }
-            if (temaResp == null || temaResp.isBlank()) {
-                incidenciaService.crear(procesoId, resp.getLitocodigo(), codigo, "SIN_TEMA_RESPUEST", "Respuesta sin tema");
+            boolean yaResueltoSinTemaRespuest = incidenciaRepository
+                    .existsByProcesoIdAndLitocodigoAndTipoAndEstado(
+                            procesoId,
+                            resp.getLitocodigo(),
+                            "SIN_TEMA_RESPUEST",
+                            "RESUELTO"
+                    );
+
+            if ((temaResp == null || temaResp.isBlank()) && !yaResueltoSinTemaRespuest) {
+                crearIncidencia(procesoId, resp.getLitocodigo(), codigo, "SIN_TEMA_RESPUEST", "Respuesta sin tema");
                 incidenciaGrave = true;
             }
             if (temaIdent != null && temaResp != null && !temaIdent.equals(temaResp)) {
-                incidenciaService.crear(procesoId, resp.getLitocodigo(), codigo, "TEMA_NO_COINCIDE", "Tema identifi diferente a tema respuest");
+                crearIncidencia(procesoId, resp.getLitocodigo(), codigo, "TEMA_NO_COINCIDE", "Tema identifi diferente a tema respuest");
                 incidenciaGrave = true;
             }
 
             boolean anulado = Boolean.TRUE.equals(resp.getAnulado()) || litocodigosAnulados.contains(resp.getLitocodigo());
 
             if (anulado) {
-                incidenciaService.crear(procesoId, resp.getLitocodigo(), codigo, "ANULADO", "Hoja anulada");
+                crearIncidencia(procesoId, resp.getLitocodigo(), codigo, "ANULADO", "Hoja anulada");
                 incidenciaGrave = true;
             }
 
@@ -290,7 +298,37 @@ public class ProcesamientoOmrService {
 
     @Transactional(readOnly = true)
     public List<ResultadoProcesadoDto> listarResultados(Long procesoId) {
-        return resultadoProcesadoRepository.findByProcesoId(procesoId).stream().map(OmrMapper::toResultadoDto).toList();
+        List<ResultadoProcesadoDto> resultados = resultadoProcesadoRepository.findByProcesoId(procesoId)
+                .stream()
+                .map(OmrMapper::toResultadoDto)
+                .toList();
+
+        Set<String> codigos = resultados.stream()
+                .map(ResultadoProcesadoDto::getCodigo)
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(c -> !c.isEmpty())
+                .collect(java.util.stream.Collectors.toSet());
+
+        if (codigos.isEmpty()) {
+            return resultados;
+        }
+
+        Map<String, String> carreraPorCodigo = new HashMap<>();
+        for (Postulante postulante : postulanteRepository.findAllById(codigos)) {
+            String nombreCarrera = postulante.getCarrera() != null ? postulante.getCarrera().getNombre() : null;
+            String codigoPostulante = postulante.getCodigo() != null ? postulante.getCodigo().trim() : null;
+            if (codigoPostulante != null && !codigoPostulante.isEmpty()) {
+                carreraPorCodigo.put(codigoPostulante, nombreCarrera);
+            }
+        }
+
+        for (ResultadoProcesadoDto dto : resultados) {
+            String codigoResultado = dto.getCodigo() != null ? dto.getCodigo().trim() : null;
+            dto.setCarrera(codigoResultado != null ? carreraPorCodigo.get(codigoResultado) : null);
+        }
+
+        return resultados;
     }
 
     private List<String> normalizar100(String s) {
@@ -309,6 +347,20 @@ public class ProcesamientoOmrService {
         while (out.size() < 100) out.add("");
         if (out.size() > 100) return out.subList(0, 100);
         return out;
+    }
+
+    private void crearIncidencia(Long procesoId, String litocodigo, String codigo, String tipo, String descripcion) {
+        ProcesoAdmision proceso = procesoAdmisionRepository.findById(procesoId).orElseThrow();
+        Incidencia incidencia = Incidencia.builder()
+                .proceso(proceso)
+                .litocodigo(litocodigo)
+                .codigo(codigo)
+                .tipo(tipo)
+                .descripcion(descripcion)
+                .estado("PENDIENTE")
+                .creadoEn(LocalDateTime.now())
+                .build();
+        incidenciaRepository.save(incidencia);
     }
 }
 
